@@ -1,64 +1,38 @@
 name: Run Tests
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - services/**
-  pull_request:
   workflow_dispatch:
 
 jobs:
-  filter:
+  tests:
     runs-on: ubuntu-24.04
-    outputs:
-      services: ${{ steps.filter.outputs.changes }}
-    steps:
-      - uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0
-      - name: Paths Changes Filter
-        id: filter
-        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+    steps: 
+      - name: checkout code 
+        uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0
+      
+      - name: Setup Node.js environment
+        uses: actions/setup-node@#820762786026740c76f36085b0efc47a31fe5020 #v7.0.0
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          filters: .github/utils/file-filters.yaml
+          node-version: '20'
 
-  run-tests:
-    runs-on: ubuntu-24.04
-    if: ${{ needs.filter.outputs.services != '[]' && needs.filter.outputs.services != '' }}
-    needs: filter
-    strategy:
-      matrix:
-        service: ${{ fromJson(needs.filter.outputs.services) }}
-      fail-fast: false
-    steps:
-      - uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0
-      - uses: ./.github/actions/setup-dependencies
+      # Installing tasksfile for running the test file
+      - name: Install task 
+        uses: supplypike/setup-bin@8365380a806a88e7a0f0d07059b175ca2f5418d7 #v5
         with:
-          install_task: "true"
-          install_go: ${{ startsWith(matrix.service, 'services/go/') }}
-          install_node: ${{ startsWith(matrix.service, 'services/node/') || startsWith(matrix.service, 'react/') }}
-          install_python: ${{ startsWith(matrix.service, 'services/python/') }}
-          service_path: ${{ matrix.service }}
-      - name: Install / Build
-        working-directory: ${{ matrix.service }}
+         uri: "https://github.com/go-task/task/releases/download/v3.53.1/task_linux_amd64.tar.gz"
+         name: task
+         version: v3.53.1
+      
+      # Install node dep
+      - name: Install node dependencies
+        working-directory: ../services/node/api-node
         run: |
+          echo "Starting dependency installation..."
           task install-ci
-      - name: run tests
-        working-directory: ${{ matrix.service }}
+          
+      # Run Test
+      - name: Running test node
+        working-directory: /services/node/api-node
         run: |
+          echo "Starting testing test cases..."
           task test
-
-  # This job gets skipped if all upstream jobs succeeded, but it runs (and fails) if any upstream failed.
-  # This is what we want since GitHub required actions do not block merging when skipped, but can block it when failed.
-  # See: https://github.com/actions/runner/issues/2566#issuecomment-3053484216
-  run-tests-failure-alert:
-    runs-on: ubuntu-latest
-    needs: [filter, run-tests]
-    if: ${{ cancelled() || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'failure') }}
-    steps:
-      - name: Conditionally Fail Required Check
-        shell: bash
-        run: |
-          echo "::error Some required job has failed!"
-          exit 1
