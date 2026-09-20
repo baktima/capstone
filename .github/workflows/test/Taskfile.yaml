@@ -1,16 +1,13 @@
 version: "3"
 
 tasks:
-  # More examples can be found in the capstone project
   act-trigger-workflow:
     desc: Trigger the test workflow locally
     cmds:
       - |
-        GIT_TERMINAL_PROMPT=0 act workflow_dispatch \
+        act workflow_dispatch \
           --container-architecture linux/amd64 \
+          # --verbose \
           -P ubuntu-24.04=catthehacker/ubuntu:act-22.04 \
-          --directory ../../.. \
+          --directory ../../../ \
           -W .github/workflows/test.yaml
-
-# note 
-# change wsl path to D filepath and docker hub, and also change all of the code into the linux distribution and update docker hub

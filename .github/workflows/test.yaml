@@ -11,28 +11,30 @@ jobs:
         uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0
       
       - name: Setup Node.js environment
-        uses: actions/setup-node@#820762786026740c76f36085b0efc47a31fe5020 #v7.0.0
-        with:
-          node-version: '20'
+        uses: actions/setup-node@d7a11313b581b306c961b506cfc8971208bb03f6 # v4.4.0
+        with: 
+          node-version-file: services/node/api-node/package.json # Specify the version to use
+          cache: "npm"
+          cache-dependency-path: services/node/api-node/package-lock.json
 
       # Installing tasksfile for running the test file
       - name: Install task 
-        uses: supplypike/setup-bin@8365380a806a88e7a0f0d07059b175ca2f5418d7 #v5
+        uses: supplypike/setup-bin@8e3f88b4f143d9b5c3497f0fc12d45c83c123787 #v4.0.1
         with:
-         uri: "https://github.com/go-task/task/releases/download/v3.53.1/task_linux_amd64.tar.gz"
-         name: task
-         version: v3.53.1
+          uri: "https://github.com/go-task/task/releases/download/v3.53.1/task_linux_amd64.tar.gz"
+          name: task
+          version: v3.53.1
       
       # Install node dep
       - name: Install node dependencies
-        working-directory: ../services/node/api-node
+        working-directory: services/node/api-node
         run: |
           echo "Starting dependency installation..."
           task install-ci
           
       # Run Test
       - name: Running test node
-        working-directory: /services/node/api-node
+        working-directory: services/node/api-node
         run: |
           echo "Starting testing test cases..."
           task test
