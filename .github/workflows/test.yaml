@@ -3,19 +3,59 @@ name: Run Tests
 on:
   workflow_dispatch:
 
+# Node.js test workflow
 jobs:
-  tests:
+  test-node:
     runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        services: [
+          # "services/node/api-node",
+          # "services/go/api-golang", 
+          # "services/react/client-react", 
+          "services/python/load-generator-python"
+          ]
+
     steps: 
       - name: checkout code 
         uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0
       
+      # Setup node and react
       - name: Setup Node.js environment
+        if: ${{startsWith(matrix.services, 'services/node') || startsWith(matrix.services, 'services/react')}} # Use * because it only cares about the node
         uses: actions/setup-node@d7a11313b581b306c961b506cfc8971208bb03f6 # v4.4.0
         with: 
-          node-version-file: services/node/api-node/package.json # Specify the version to use
+          node-version-file: ${{matrix.services}}/package.json # Specify the version to use
           cache: "npm"
-          cache-dependency-path: services/node/api-node/package-lock.json
+          cache-dependency-path: ${{matrix.services}}/package-lock.json
+
+      # Setup go 
+      - name: Setup Go-lang environment
+        if: ${{startsWith(matrix.services, 'services/go')}}
+      
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        with: 
+          go-version-file: ${{matrix.services}}/go.mod
+          cache: true
+          cache-dependency-path: ${{matrix.services}}/go.sum
+
+      # install poetry
+      - name: install poetry
+        if: ${{ startsWith(matrix.services, 'services/python')}}
+
+        uses: snok/install-poetry@a783c322200f0519c7926aa6faa857c4e23e9263 #v1.4.2
+
+
+      # Setup python
+      - name: Setup python environment
+        if: ${{ startsWith(matrix.services, 'services/python')}}
+
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with: 
+          python-version-file: ${{matrix.services}}/pyproject.toml
+          cache: poetry
+          cache-dependency-path: ${{matrix.services}}/poetry.lock
 
       # Installing tasksfile for running the test file
       - name: Install task 
@@ -26,15 +66,15 @@ jobs:
           version: v3.53.1
       
       # Install node dep
-      - name: Install node dependencies
-        working-directory: services/node/api-node
+      - name: Install app dependencies
+        working-directory: ${{matrix.services}}
         run: |
           echo "Starting dependency installation..."
           task install-ci
           
       # Run Test
-      - name: Running test node
-        working-directory: services/node/api-node
+      - name: Running app test
+        working-directory: ${{matrix.services}}
         run: |
           echo "Starting testing test cases..."
           task test
