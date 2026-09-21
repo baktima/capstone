@@ -847,7 +847,7 @@
     },
     "nodejs_24@latest": {
       "last_modified": "2025-08-11T07:05:29Z",
-      "plugin_version": "0.0.4",
+      "plugin_version": "0.0.5",
       "resolved": "github:NixOS/nixpkgs/9585e9192aadc13ec3e49f33f8333bd3cda524df#nodejs_24",
       "source": "devbox-search",
       "version": "24.5.0",
@@ -928,7 +928,7 @@
     },
     "poetry@latest": {
       "last_modified": "2025-07-24T15:00:16Z",
-      "plugin_version": "0.0.5",
+      "plugin_version": "0.0.6",
       "resolved": "github:NixOS/nixpkgs/b74a30dbc0a72e20df07d43109339f780b439291#poetry",
       "source": "devbox-search",
       "version": "2.1.3",

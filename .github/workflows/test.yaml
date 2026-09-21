@@ -20,7 +20,6 @@ jobs:
         with: 
           filters: .github/utils/file-filters.yaml
           token: $${{ secrets.GITHUB_TOKEN }}
-          base: HEAD~1 # compare the latest commit compared to the head - 1 
 
 
   test-node:
@@ -29,7 +28,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        services: ${{ fromJson(needs.filter.outputs.services) }}
+        services: ["services/node/api-node"]
+        # [${{ fromJson(needs.filter.outputs.services) }}]
 
     steps: 
       - name: checkout code 

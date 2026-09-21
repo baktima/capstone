@@ -42,3 +42,4 @@ if __name__ == "__main__":
 
     logging.info(f"Starting load generator for {api_url} with a delay of {delay_ms} milliseconds between requests.")
     run_load_generator(api_url, delay_ms)
+# test changes to trigger workflow
