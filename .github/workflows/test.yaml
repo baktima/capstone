@@ -5,17 +5,31 @@ on:
 
 # Node.js test workflow
 jobs:
+  filter: 
+    runs-on: ubuntu-24.04
+    outputs: 
+      services: ${{steps.filter.outputs.changes}} # will output a string of json
+
+    steps: 
+      - name: checkout code 
+        uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0
+
+      - name: path changes filter
+        id: filter
+        uses: dorny/paths-filter@0e4a8c6effa4802afeda77dc8d303f8176d7dfad # v3.0.4
+        with: 
+          filters: .github/utils/file-filters.yaml
+          token: $${{ secrets.GITHUB_TOKEN }}
+          base: HEAD~1 # compare the latest commit compared to the head - 1 
+
+
   test-node:
     runs-on: ubuntu-24.04
+    needs: filter # so it needs to use the output of the filters
     strategy:
       fail-fast: false
       matrix:
-        services: [
-          # "services/node/api-node",
-          # "services/go/api-golang", 
-          # "services/react/client-react", 
-          "services/python/load-generator-python"
-          ]
+        services: ${{ fromJson(needs.filter.outputs.services) }}
 
     steps: 
       - name: checkout code 
@@ -43,9 +57,7 @@ jobs:
       # install poetry
       - name: install poetry
         if: ${{ startsWith(matrix.services, 'services/python')}}
-
         uses: snok/install-poetry@a783c322200f0519c7926aa6faa857c4e23e9263 #v1.4.2
-
 
       # Setup python
       - name: Setup python environment
@@ -70,6 +82,7 @@ jobs:
         working-directory: ${{matrix.services}}
         run: |
           echo "Starting dependency installation..."
+          ls -la
           task install-ci
           
       # Run Test

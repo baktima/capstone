@@ -1,5 +1,9 @@
 version: "3"
 
+env:
+  GITHUB_TOKEN: 
+    sh: gh auth token
+
 tasks:
   act-trigger-workflow:
     desc: Trigger the test workflow locally
@@ -7,7 +11,8 @@ tasks:
       - |
         act workflow_dispatch \
           --container-architecture linux/amd64 \
-          # --verbose \
+          -s GITHUB_TOKEN={{.GITHUB_TOKEN}} \
+          -e {{.PWD}}/event.json \
           -P ubuntu-24.04=catthehacker/ubuntu:act-22.04 \
           --directory ../../../ \
           -W .github/workflows/test.yaml
