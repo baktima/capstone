@@ -1,11 +1,11 @@
 services/go/api-golang: &api_golang
   - "services/go/api-golang/**"
   - "services/other/api-golang-migrator/**" #db migration tied to services
-  - ".github/workflow/test.yaml"
+  - ".github/workflows/test.yaml"
 
 services/node/api-node:
   - "services/node/api-node/**"
-  - ".github/workflow/test.yaml"
+  - ".github/workflows/test.yaml"
 
 services/other/api-golang-migrator: 
   - *api_golang
