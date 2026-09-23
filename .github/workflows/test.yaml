@@ -28,8 +28,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        services: ["services/node/api-node"]
-        # [${{ fromJson(needs.filter.outputs.services) }}]
+        services: ${{ fromJson(needs.filter.outputs.services) }}
 
     steps: 
       - name: checkout code 
